@@ -1,8 +1,9 @@
-import * as React from "react";
+import React from "react";
+import ReactDOM from "react-dom/client";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import Heading4 from "./common/heading/heading4";
-import Buttoncomponent from "./common/button/button";
+import Heading4 from "./common/button/button"
+import Buttoncomponent from "./common/button/button"
 import { TextField, Stack, Typography } from "@mui/material";
 import useLoginHook from "../../customHooks/useloginhook";
 import { Container, Paper, Avatar, Grid } from "@mui/material";
@@ -37,7 +38,8 @@ const CenteredContainer = styled("div")({
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
-  height: "80vh",
+  height: "120vh",
+  width: "120vh",
 });
 const Login = () => {
   const {
@@ -63,10 +65,10 @@ const Login = () => {
   };
 
   return (
+   
     <CenteredContainer>
-      <StyledPaper elevation={6}>
+      <StyledPaper elevation={10}>
         <Avatar src="/broken-image.jpg" style={{ marginBottom: 16 }} />
-        {/* <Heading4 text={"Login"} variant={"h4"} /> */}
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3} justifyContent="center" maxWidth="100%">
             <Grid item xs={12}>
@@ -84,7 +86,7 @@ const Login = () => {
                   <TextField
                     label="Email"
                     type="email"
-                    placeholder="Enter email"
+                    placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => {
                       handleEmailChange(e);
