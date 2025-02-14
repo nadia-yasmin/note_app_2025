@@ -1,11 +1,13 @@
 import { useState, useEffect, useContext } from "react";
 import axiosInstancefile from "../Utils/axiosinstanceform";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-const useLoginHook = () => {
-  const [refresh,setRefresh]=useState(false)
-  const navigate=useNavigate()
+
+const useCreateNotehook = () => {
+  const [refresh, setRefresh] = useState(false);
+  const navigate = useNavigate();
+
   const showSuccessAlert = (message) => {
     console.log('Showing success toast with message:', message);
     toast.success(message, {
@@ -14,42 +16,40 @@ const useLoginHook = () => {
     });
     setTimeout(() => {
       console.log('Navigating to the home page...');
-      navigate("/notewriting"); 
+      navigate("/"); 
     }, 2000);
   };
-  
+
   const showErrorAlert = (errorMessage) => {
     toast.error(errorMessage, {
       position: "top-right",
       autoClose: 2000, 
     });
   };
-  const createLogin = (formData) => {
+
+  const createNote = (formData) => {
     console.log("formData", formData);
+    const userData = JSON.parse(localStorage.getItem("userdata"));
+    const userName = userData ? userData.name : "Anonymous";
+    const formDataWithAuthor = { ...formData, author: userName };
+    
     axiosInstancefile
-      .post("/login", formData)
+      .post("/addnote", formDataWithAuthor)
       .then((response) => response.data)
       .then((data) => {
         if (data.success) {
-          const token = data.data.token;
-          setRefresh(!refresh)
-          localStorage.setItem("userdata", JSON.stringify(data.data));
-          localStorage.setItem("token", token);
-          console.log("userdata",data)
+          console.log("Data: ", data);
           showSuccessAlert(data.message);
-          // navigate("/dashboard")
-         
         }
-        console.log("Successfully logged in:", data);
-        // localStorage.setItem("responseData", data.message);
+        console.log("Successfully note submitted.", data);
       })
       .catch((error) => {
-        console.error("Error adding user:", error);
+        console.error("Error submitting note.", error);
         showErrorAlert(error.response.data.message);
       });
   };
 
-  return { createLogin ,refresh};
+  return { createNote, refresh };
 };
 
-export default useLoginHook;
+export default useCreateNotehook;

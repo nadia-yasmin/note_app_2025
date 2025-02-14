@@ -48,7 +48,7 @@ class authController {
           adminId = result._id;
         }
         if (role === "user") {
-          learnerId = result._id;
+          userId = result._id;
         } 
         const hashedPassword = await bcrypt.hash(password, 10);
         const result2 = await authModel.create({
