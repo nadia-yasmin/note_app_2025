@@ -7,5 +7,8 @@ const noteController = require("../controller/noteController");
 const authController = require("../controller/authController");
 
 routes.post( "/addnote", upload.none(),(req, res, next) => {noteController.addNote(req, res);});
+routes.post( "/signup", upload.none(),(req, res, next) => {authController.signUp(req, res);});
+routes.post( "/login", upload.none(),(req, res, next) => {authController.login(req, res);});
+routes.post( "/logout", upload.none(),(req, res, next) => {authController.logout(req, res);});
 routes.use(urlnotfound.notFound);
 module.exports = routes;

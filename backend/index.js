@@ -8,10 +8,13 @@ const urlnotfound = require("./constants/urlnotfound");
 const databaseConnection = require("./database");
 const HTTP_STATUS = require("./constants/statusCodes");
 dotenv.config();
+const cookieParser = require("cookie-parser");
 app.use(express.json());
 app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*" }));
+app.use(cookieParser()); 
+
 app.use("/note", noteRouter);
 app.use(urlnotfound.notFound);
 const multer = require("multer");

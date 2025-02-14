@@ -50,7 +50,7 @@ const authSchema = new mongoose.Schema(
       required: false,
       default: null,
     },
-    token: [
+    refreshToken: [
       {
         type: String,
         required: false,

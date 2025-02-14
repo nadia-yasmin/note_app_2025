@@ -12,7 +12,12 @@ const noteSchema = new mongoose.Schema(
     author: {
         type: String,
         required: [true, "author must be given"],
-      },    
+      }, 
+      noteId: 
+        [
+          {type: String,},
+        ],
+         
   },
   { timestamps: true }
 );

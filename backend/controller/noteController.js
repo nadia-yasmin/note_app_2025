@@ -23,15 +23,33 @@ class noteController {
         content: content,
       });
       if (result) {
-          return res.status(200).send(success("New course added", result));
+          return res.status(200).send(success("New note added", result));
         } 
       else {
-        return res.status(400).send(failure("Could not add a new course"));
+        return res.status(400).send(failure("Could not add a new note"));
       }
     } catch (error) {
-      console.log("Course add error", error);
+      console.log("Note add error", error);
       return res.status(500).send(failure("Internal server error"));
     }
   } 
+
+  async updateNote(req, res) {
+    try {
+      const { title, content } = req.body;
+      const note = await noteModel.findOne({ title: title });
+      if (!note) {
+        return res.status(404).json({ error: "Note is not found" });
+      }
+      note.content = content;
+      const savedNote = await note.save();
+      return res
+        .status(200)
+        .json({ message: "Note updated successfully", savedNote });
+    } catch (error) {
+      console.error("Update note error", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
 }
 module.exports = new noteController();
