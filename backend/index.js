@@ -17,6 +17,7 @@ app.use(cookieParser());
 const http = require('http');
 const socketIo = require('socket.io');
 const server = http.createServer(app);
+const { Server } = require("socket.io");
 
 app.use("/note", noteRouter);
 app.use(urlnotfound.notFound);
@@ -31,12 +32,12 @@ app.use((err, req, res, next) => {
     res.status(400).send({ message: `${err.message}` });
   }
 });
-const io = socketIo(server, {
+const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", 
-    methods: ["GET", "POST"]
+      origin: "*", // Allow all origins for testing
   }
 });
+app.set("socketio", io);
 io.on('connection', (socket) => {
   console.log('A user connected');
 socket.on('disconnect', () => {
@@ -44,7 +45,9 @@ socket.on('disconnect', () => {
   });
 });
 databaseConnection(() => {
-  app.listen(8000, () => {
+  server.listen(8000, () => {  // Start the HTTP server instead of app.listen
     console.log("Server is running on port 8000");
-  });
+  });
 });
+
+module.exports = { app, server, io };

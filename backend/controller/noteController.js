@@ -5,6 +5,7 @@ const ejs = require("ejs");
 const express = require("express");
 const app = express();
 const { validationResult } = require("express-validator");
+const {io}= require("../index.js")
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 require("dotenv").config();
@@ -38,13 +39,15 @@ class noteController {
   async updateNote(req, res) {
     try {
       const { title, content } = req.body;
-      const note = await noteModel.findOne({ title: title });     
+      const note = await noteModel.findOne({ title }); 
       if (!note) {
-        return res.status(404).json({ error: "Note is not found" });
-      }
+        return res.status(404).json({ error: "Note not found" });
+      } 
       note.content = content;
       const savedNote = await note.save();
-      io.emit('noteUpdated', savedNote); 
+      const io = req.app.get("socketio");
+      io.emit("noteUpdated", { title, content: savedNote.content });
+  
       return res.status(200).json({
         message: "Note updated successfully",
         savedNote,
@@ -53,8 +56,9 @@ class noteController {
       console.error("Update note error", error);
       return res.status(500).json({ error: "Internal server error" });
     }
-
   }
+  
+  
   async showAllNotes(req, res) {
     try {
         const { email } = req.body;
