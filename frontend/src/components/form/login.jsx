@@ -6,6 +6,7 @@ import Heading4 from "./common/button/button"
 import Buttoncomponent from "./common/button/button"
 import { TextField, Stack, Typography } from "@mui/material";
 import useLoginHook from "../../customHooks/useloginhook";
+import CenteredContainer from "./common/centered container/centeredcontainer";
 import { Container, Paper, Avatar, Grid } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Alert from "@mui/material/Alert";
@@ -33,14 +34,9 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
     backgroundColor: "white",
   },
 }));
-const CenteredContainer = styled("div")({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  textAlign: "center",
-  height: "120vh",
-  width: "120vh",
-});
+
+
+
 const Login = () => {
   const {
     control,

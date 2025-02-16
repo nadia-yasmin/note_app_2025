@@ -5,21 +5,22 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const useCreateNotehook = () => {
-  const [refresh, setRefresh] = useState(false);
   const navigate = useNavigate();
 
-  const showSuccessAlert = (message) => {
+  const showSuccessAlert = (message, resetForm) => {
     console.log('Showing success toast with message:', message);
     toast.success(message, {
       position: "top-right",
       autoClose: 2000, 
     });
     setTimeout(() => {
-      console.log('Navigating to the home page...');
-      navigate("/"); 
-    }, 2000);
-  };
-
+        console.log('Clearing the form...');
+        resetForm({
+            title: "",  
+            content: "",
+          });
+      }, 2000);
+    };
   const showErrorAlert = (errorMessage) => {
     toast.error(errorMessage, {
       position: "top-right",
@@ -27,11 +28,12 @@ const useCreateNotehook = () => {
     });
   };
 
-  const createNote = (formData) => {
+  const createNote = (formData, resetForm) => {
     console.log("formData", formData);
     const userData = JSON.parse(localStorage.getItem("userdata"));
     const userName = userData ? userData.name : "Anonymous";
-    const formDataWithAuthor = { ...formData, author: userName };
+    const email = userData ? userData.email : "anonymous@gmail.com";
+    const formDataWithAuthor = { ...formData, author: userName, email:email };
     
     axiosInstancefile
       .post("/addnote", formDataWithAuthor)
@@ -39,7 +41,7 @@ const useCreateNotehook = () => {
       .then((data) => {
         if (data.success) {
           console.log("Data: ", data);
-          showSuccessAlert(data.message);
+          showSuccessAlert(data.message, resetForm);
         }
         console.log("Successfully note submitted.", data);
       })
@@ -49,7 +51,7 @@ const useCreateNotehook = () => {
       });
   };
 
-  return { createNote, refresh };
+  return { createNote };
 };
 
 export default useCreateNotehook;

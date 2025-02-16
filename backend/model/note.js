@@ -13,6 +13,10 @@ const noteSchema = new mongoose.Schema(
         type: String,
         required: [true, "author must be given"],
       }, 
+      email: {
+        type: String,
+        required: [true, "email must be given"],
+      }, 
       noteId: 
         [
           {type: String,},

@@ -36,17 +36,17 @@ const CenteredContainer = styled("div")({
   height: "90vh",
 });
 const Notewriting = () => {
-    const { control, handleSubmit, formState: { errors }, setValue } = useForm({
+    const { control, handleSubmit, formState: { errors }, setValue , reset} = useForm({
         mode: "onChange",
         defaultValues: {
-          Title: "", 
+          title: "", 
           content: "", 
         }
       });
   const { createNote } = useCreateNotehook();
   const onSubmit = (data) => {
     console.log("data is ", data);
-    createNote(data);
+    createNote(data, reset);
   };
   return (
     <CenteredContainer>
@@ -68,7 +68,7 @@ const Notewriting = () => {
                 rules={{
                   required: "Title is required",
                   pattern: {
-                    value: /^[A-Za-z0-9!?'".]*$/, 
+                    value: /^[A-Za-z0-9!?'". ]*$/, 
                     message: "Title must contain alphabets and allowed special characters: ! ? ' \" .",
                   }
                 }}

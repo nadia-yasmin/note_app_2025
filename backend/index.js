@@ -14,6 +14,10 @@ app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*" }));
 app.use(cookieParser()); 
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+
 app.use("/note", noteRouter);
 app.use(urlnotfound.notFound);
 const multer = require("multer");
@@ -26,6 +30,18 @@ app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     res.status(400).send({ message: `${err.message}` });
   }
+});
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:3000", 
+    methods: ["GET", "POST"]
+  }
+});
+io.on('connection', (socket) => {
+  console.log('A user connected');
+socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
 });
 databaseConnection(() => {
   app.listen(8000, () => {
