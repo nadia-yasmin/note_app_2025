@@ -14,7 +14,7 @@ const usesignuphook = (role) => {
      });
      setTimeout(() => {
        console.log('Navigating to the home page...');
-       navigate("/login"); 
+       navigate("/"); 
      }, 2000);
    };
    
@@ -31,7 +31,7 @@ const usesignuphook = (role) => {
     formData.append("password", data.password);
     formData.append("confirmPassword", data.confirmPassword);
     formData.append("name", data.name);
-    formData.append("file", data.file[0]);
+  
     axiosInstancefile
       .post(`/signup?role=${role}`, formData, {
         headers: {

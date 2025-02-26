@@ -10,39 +10,40 @@ import Buttoncomponent from "./common/button/button";
 import axiosInstancefile from "../../Utils/axiosinstanceform";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-const socket = io("http://localhost:8000", { transports: ["websocket"] }); 
+const ENDPOINT="http://localhost:5000";
+var socket, selectedNoteCompare;
 
 const UpdateContent = () => {
+  const userData = JSON.parse(localStorage.getItem("userdata"));
   const navigate = useNavigate();
   const { title } = useParams();
   const [note, setNote] = useState(null);
   const { control, handleSubmit, formState: { errors }, setValue } = useForm();
   const [isUpdating, setIsUpdating] = useState(false); 
+  const [socketConnected, setSocketConnected] = useState(false); 
 
   useEffect(() => {
-    const fetchNote = async () => {
-      try {
-        const response = await axiosInstancefile.get(`/shownotebytitle?title=${title}`);
-        if (response.data) {
-          setNote(response.data.data[0]);
-          setValue("content", response.data.data[0].content);
-        }
-      } catch (error) {
-        console.error("Error fetching note:", error);
-        toast.error("Failed to fetch note");
+  const fetchNote = async () => {
+    try {
+      const response = await axiosInstancefile.get(`/shownotebytitle?title=${title}`);
+      if (response.data) {
+        setNote(response.data.data[0]);
+        setValue("content", response.data.data[0].content);
       }
-    };
-    fetchNote();
-    socket.on("noteUpdated", (updatedNote) => {
-      if (updatedNote.title === title) {
-        setNote(updatedNote);
-        setValue("content", updatedNote.content);
-      }
-    });
-    return () => {
-      socket.off("noteUpdated"); 
-    };
-  }, [title, setValue]);
+    } catch (error) {
+      console.error("Error fetching note:", error);
+      toast.error("Failed to fetch note");
+    }
+  };
+  fetchNote();
+}, []); 
+
+useEffect(() => {
+ socket= io(ENDPOINT);
+ socket.emit("setup",userData);
+ socket.on("connection",()=>{setSocketConnected(true)})
+
+}, []); 
 
   const onSubmit = async (data) => {
     try {

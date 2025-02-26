@@ -32,6 +32,7 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "prettier": "3.5.2"
   }
 }

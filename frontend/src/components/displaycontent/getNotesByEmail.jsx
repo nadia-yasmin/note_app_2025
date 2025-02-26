@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axiosInstancefile from "../../Utils/axiosinstanceform";
@@ -15,7 +16,26 @@ const GetNotesByEmail = () => {
   const [noteData, setNoteData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); 
+  const [socketConnected, setSocketConnected]= useState(false)
+  const navigate = useNavigate();
+  const ENDPOINT= "http://localhost:8000";
+
+  // Socket connection 
+  useEffect(() => {
+    const socket = io(ENDPOINT, { transports: ["websocket"] });
+    if (userData) {
+      socket.emit("setup", userData);
+    }
+    socket.on("connected", () => {
+      setSocketConnected(true);
+      console.log("Connected to socket.io");
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [userData]);
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -24,9 +44,9 @@ const GetNotesByEmail = () => {
         if (response.data && Array.isArray(response.data.data)) {
           setNoteData(response.data.data);
         } else {
-          setNoteData([]); 
+          setNoteData([]);
         }
-        setLoading(false); 
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError(error.message);
@@ -35,7 +55,17 @@ const GetNotesByEmail = () => {
     };
 
     fetchData();
-  }, [email]); 
+  }, [email]);
+
+  // useEffect(()=>{
+  //      const socket = io(ENDPOINT);
+  //   socket.emit("setup", userData); // Send userData to server
+  //   socket.on("connection", () =>setSockedConnected(true));
+  //   // return () => {
+  //   //   socket.disconnect();
+  //   // };
+  // },[]
+  // )
 
   if (loading) {
     return (
