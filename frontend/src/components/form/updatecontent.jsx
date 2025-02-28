@@ -38,12 +38,12 @@ const UpdateContent = () => {
   fetchNote();
 }, []); 
 
-useEffect(() => {
- socket= io(ENDPOINT);
- socket.emit("setup",userData);
- socket.on("connection",()=>{setSocketConnected(true)})
+// useEffect(() => {
+//  socket= io(ENDPOINT);
+//  socket.emit("setup",userData);
+//  socket.on("connection",()=>{setSocketConnected(true)})
 
-}, []); 
+// }, []); 
 
   const onSubmit = async (data) => {
     try {
