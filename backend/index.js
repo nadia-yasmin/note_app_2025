@@ -36,35 +36,33 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: "Internal Server Error" });
 });
 
-
-  databaseConnection().then(() => {
-    const server= app.listen(8000, () => {
+databaseConnection()
+  .then(() => {
+    const server = app.listen(8000, () => {
       console.log("Server is running on port 8000");
+    });
+
+    // Attach Socket.IO to the same server
+    const io = require("socket.io")(server, {
+      pingTimeout: 60000,
+      cors: {
+        origin: "http://localhost:5000",
+      },
+    });
+
+    io.on("connection", (socket) => {
+      console.log("connected to socket.io");
+      socket.on("setup", (userData) => {
+        console.log("Created room for", userData._id);
+        socket.join(userData._id);
+        console.log(`User joined room ${userData._id}`);
+        socket.emit("connected", { message: "Connection established" });
+      });
     });
   })
   .catch((error) => {
     console.error("Database connection failed. Server not started.", error);
   });
 
-  const io= require("socket.io")(server,{
-    pingTimeout:60000,
-    cors:{
-      origin:"http://localhost:5000",
-    }
-  })
-io.on("connection", (socket) => {
-  console.log("connected to socket.io");
-  socket.on("setup", (userData) => {
-    console.log("Created room for", userData._id);
-    socket.join(userData._id); 
-    console.log(`User joined room ${userData._id}`);
-    socket.emit("connected", { message: "Connection established" });
-  });
 
-  // socket.on("disconnect", () => {
-  //   console.log("User disconnected");
-  // });
-});
-
-
-module.exports = { app, server, io };
+module.exports = { app, server};

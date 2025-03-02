@@ -6,14 +6,14 @@ const validator = {
       .exists().withMessage("Title must be provided")
       .notEmpty().withMessage("Title cannot be empty")
       .isString().withMessage("Title must be a string")
-      .isLength({ min: 5 }).withMessage("Title must be at least 5 characters long")
+      .isLength({ min: 3 }).withMessage("Title must be at least 3 characters long")
       .isLength({ max: 100 }).withMessage("Title cannot exceed 100 characters"),
       
     body("content")
       .exists().withMessage("Content must be provided")
       .notEmpty().withMessage("Content cannot be empty")
       .isString().withMessage("Content must be a string")
-      .isLength({ min: 20 }).withMessage("Content must be at least 20 characters long")
+      .isLength({ min: 5 }).withMessage("Content must be at least 5 characters long")
       .isLength({ max: 1000 }).withMessage("Content cannot exceed 1000 characters"),
 
     body("author")
@@ -33,14 +33,14 @@ const validator = {
             .exists().withMessage("Title must be provided")
       .notEmpty().withMessage("Title cannot be empty")
       .isString().withMessage("Title must be a string")
-      .isLength({ min: 5 }).withMessage("Title must be at least 5 characters long")
+      .isLength({ min: 3 }).withMessage("Title must be at least 3 characters long")
       .isLength({ max: 100 }).withMessage("Title cannot exceed 100 characters"),
       
     body("newContent")
        .exists().withMessage("New content must be provided")
       .notEmpty().withMessage("New content cannot be empty")
       .isString().withMessage("New content must be a string")
-      .isLength({ min: 20 }).withMessage("New content must be at least 20 characters long")
+      .isLength({ min: 5 }).withMessage("New content must be at least 5 characters long")
       .isLength({ max: 1000 }).withMessage("New content cannot exceed 1000 characters"),
 
   body("email")

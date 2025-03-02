@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; // Add useRef here
 import { io } from "socket.io-client";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -16,31 +16,47 @@ const GetNotesByEmail = () => {
   const [noteData, setNoteData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [socketConnected, setSocketConnected]= useState(false)
+  const [socketConnected, setSocketConnected] = useState(false);
   const navigate = useNavigate();
-  const ENDPOINT= "http://localhost:8000";
+  const ENDPOINT = "http://localhost:8000";
 
-  // Socket connection 
+  // Use useRef to store the socket instance
+  const socketRef = useRef(null);
+
+  // Socket connection
   useEffect(() => {
-    const socket = io(ENDPOINT, { transports: ["websocket"] });
+    if (!socketRef.current) {
+      socketRef.current = io(ENDPOINT, { transports: ["websocket"] });
+    }
+
+    const socket = socketRef.current;
+
     if (userData) {
       socket.emit("setup", userData);
     }
+
     socket.on("connected", () => {
       setSocketConnected(true);
       console.log("Connected to socket.io");
     });
-    return () => {
-      socket.disconnect();
-    };
+
+    socket.on("connect_error", (err) => {
+      console.error("Socket.IO connection error:", err);
+      setSocketConnected(false);
+    });
+
+    // Cleanup on unmount
+    // return () => {
+    //   socket.disconnect();
+    //   socketRef.current = null;
+    // };
   }, [userData]);
 
-
+  // Fetch notes
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axiosInstancefile.post(`/showallnotes`, { email });
-        console.log("Response:", response);
         if (response.data && Array.isArray(response.data.data)) {
           setNoteData(response.data.data);
         } else {
@@ -56,16 +72,6 @@ const GetNotesByEmail = () => {
 
     fetchData();
   }, [email]);
-
-  // useEffect(()=>{
-  //      const socket = io(ENDPOINT);
-  //   socket.emit("setup", userData); // Send userData to server
-  //   socket.on("connection", () =>setSockedConnected(true));
-  //   // return () => {
-  //   //   socket.disconnect();
-  //   // };
-  // },[]
-  // )
 
   if (loading) {
     return (
