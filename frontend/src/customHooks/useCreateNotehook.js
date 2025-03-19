@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import axiosInstancefile from "../Utils/axiosinstanceform";
+import axiosInstance from "../Utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -31,12 +32,17 @@ const useCreateNotehook = () => {
   const createNote = (formData, resetForm) => {
     console.log("formData", formData);
     const userData = JSON.parse(localStorage.getItem("userdata"));
+    const token = localStorage.getItem("token");
     const userName = userData ? userData.name : "Anonymous";
     const email = userData ? userData.email : "anonymous@gmail.com";
     const formDataWithAuthor = { ...formData, author: userName, email:email };
     
-    axiosInstancefile
-      .post("/addnote", formDataWithAuthor)
+    axiosInstance
+      .post("/addnote", formDataWithAuthor, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
       .then((response) => response.data)
       .then((data) => {
         if (data.success) {

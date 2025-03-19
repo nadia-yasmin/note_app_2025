@@ -11,7 +11,9 @@ const isAuthorised = (req, res, next) => {
       console.log("Unauthorised access, login korenai");
       return res.status(200).send(failure("Unauthorised access"));
     }
+    // console.log("Request :", req.headers)
     const jwt = req.headers.authorization.split(" ")[1];
+    // console.log("JWT: ",jwt);
     const validate = jsonwebtoken.verify(jwt, process.env.SECRET_KEY);
     if (validate) {
       // console.log("validate", validate)

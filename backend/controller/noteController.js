@@ -52,6 +52,7 @@ class noteController {
 
   async updateNote(req, res) {
     try {
+
         const { email, title, newContent } = req.body;
         // console.log("email, title, newContent", email, title, newContent)
 const errors = validationResult(req);
@@ -72,22 +73,29 @@ const errors = validationResult(req);
             return res.status(403).send(failure("Updating is not possible. Only the note owner or an admin can delete it."));
         }
         const note = await noteModel.findOneAndUpdate(
-            { email: email, title: title },
-            { content: newContent },
-            { new: true }
-        );
+  { email: email, title: title },
+  { content: newContent },
+  { new: true }
+);
 
-        if (!note) {
-            return res.status(404).send(failure("Note not found"));
-        }
-        
-        const updatedNotes = await noteModel.find({ email: email });
+if (!note) {
+  return res.status(404).send(failure("Note not found"));
+}
 
-        const io = req.app.get("socketio");
-        if (io) {
-            console.log("Emitting updated notes to:", email);
-            io.to(email).emit("noteUpdated", updatedNotes);
-        }
+// Check if note is updated
+console.log("Note updated:", note);
+
+const updatedNotes = await noteModel.find({ email: email });
+// console.log("Updated notes:", updatedNotes);  // Check if updated notes are fetched
+
+const io = req.app.get("socketio");
+if (io) {
+ console.log("Broadcasting updated notes to all clients");
+  io.emit("noteUpdated", updatedNotes);  // Broadcast to all clients
+} else {
+  console.error("Socket.io instance not found.");
+}
+
 
         return res.status(200).send(success("Note updated successfully", note));
     } catch (error) {

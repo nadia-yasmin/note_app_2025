@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; // Add useRef here
+import React, { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -19,40 +19,44 @@ const GetNotesByEmail = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const navigate = useNavigate();
   const ENDPOINT = "http://localhost:8000";
-
-  // Use useRef to store the socket instance
   const socketRef = useRef(null);
 
-  // Socket connection
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io(ENDPOINT, { transports: ["websocket"] });
-    }
+    // Establish socket connection
+    socketRef.current = io(ENDPOINT, { transports: ["websocket"] });
 
     const socket = socketRef.current;
 
-    if (userData) {
-      socket.emit("setup", userData);
-    }
-
-    socket.on("connected", () => {
+    socket.on("connect", () => {
+      console.log("Socket connected");
       setSocketConnected(true);
-      console.log("Connected to socket.io");
+      if (userData) {
+        socket.emit("setup", userData);
+      }
     });
 
     socket.on("connect_error", (err) => {
-      console.error("Socket.IO connection error:", err);
-      setSocketConnected(false);
+      console.error("Socket connection error:", err);
     });
 
-    // Cleanup on unmount
+    // Handle updated notes event
+    socket.on("noteUpdated", (updatedNotes) => {
+      console.log("Received updated notes via socket:", updatedNotes);
+      setNoteData(updatedNotes);
+    });
+
+    // (Optional) Debug message
+    socket.on("hi", (message) => {
+      console.log("Message from server:", message);
+    });
+
     // return () => {
     //   socket.disconnect();
     //   socketRef.current = null;
     // };
-  }, [userData]);
+  }, []);
 
-  // Fetch notes
+  // Fetch initial notes only once
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -122,7 +126,7 @@ const GetNotesByEmail = () => {
                       padding: "10px",
                       marginBottom: "10px",
                       borderRadius: "8px",
-                      display: "block", // Makes the content appear stacked vertically
+                      display: "block",
                     }}
                   >
                     <Grid container direction="column" spacing={1}>
