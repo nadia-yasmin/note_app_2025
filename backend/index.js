@@ -16,6 +16,9 @@ const databaseConnection = require("./database");
 dotenv.config();
 
 const app = express();
+global.myname = "nadia";
+global.allUsers= [];
+global.noteLocks={};
 
 // Middlewares
 app.use(express.json());
@@ -51,10 +54,8 @@ databaseConnection()
         origin: "http://localhost:5000", // frontend
       },
     });
-    // Store the socket.io instance on the app object
-app.set("socketio", io); // Now, you can access io in your controllers
+app.set("socketio", io); 
 
-    // Import socket logic
     require("./socket/socket")(io);
 
     server.listen(8000, () => {

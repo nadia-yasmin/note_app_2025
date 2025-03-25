@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -7,6 +7,7 @@ import CenteredContainer from "../form/common/centered container/centeredcontain
 import Heading4 from "../form/common/button/button";
 import { Button, Typography, Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import socket from "../../../socket/socket";
 
 const defaultTheme = createTheme();
 
@@ -18,62 +19,63 @@ const GetNotesByEmail = () => {
   const [error, setError] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const navigate = useNavigate();
-  const ENDPOINT = "http://localhost:8000";
-  const socketRef = useRef(null);
 
   useEffect(() => {
-    // Establish socket connection
-    socketRef.current = io(ENDPOINT, { transports: ["websocket"] });
-
-    const socket = socketRef.current;
-
     socket.on("connect", () => {
       console.log("Socket connected");
-      setSocketConnected(true);
-      if (userData) {
-        socket.emit("setup", userData);
-      }
+      socket.emit("setup", userData);
     });
 
-    socket.on("connect_error", (err) => {
-      console.error("Socket connection error:", err);
+    socket.on("noteUnlocked", ({ title }) => {
+      console.log(`Note '${title}' is now unlocked`);
     });
 
-    // Handle updated notes event
-    socket.on("noteUpdated", (updatedNotes) => {
-      console.log("Received updated notes via socket:", updatedNotes);
-      setNoteData(updatedNotes);
+    socket.on("updateDenied", ({ title }) => {
+      alert(`You are not allowed to edit the note '${title}'.`);
     });
 
-    // (Optional) Debug message
-    socket.on("hi", (message) => {
-      console.log("Message from server:", message);
-    });
-
-    // return () => {
-    //   socket.disconnect();
-    //   socketRef.current = null;
-    // };
+    return () => {
+      socket.off("noteUnlocked");
+      socket.off("updateDenied");
+    };
   }, []);
 
-  // Fetch initial notes only once
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstancefile.post(`/showallnotes`, { email });
-        if (response.data && Array.isArray(response.data.data)) {
-          setNoteData(response.data.data);
-        } else {
-          setNoteData([]);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError(error.message);
-        setLoading(false);
-      }
-    };
+  const handleNoteClick = (title) => {
+    socket.emit("lockNote", { email, title });
 
+    socket.once("noteLockGranted", ({ title }) => {
+      console.log(`Note '${title}' locked. Redirecting to update page.`);
+      navigate(`/updatecontent/${title}`);
+    });
+
+    socket.once("noteLockDenied", ({ title }) => {
+      alert(`Note '${title}' is currently being edited by another user.`);
+    });
+  };
+
+
+socket.on("noteUpdated", (updatedNote) => {
+  console.log("Event received: noteUpdated", updatedNote);
+  setNoteData(updatedNote);
+});
+
+  const fetchData = async () => {
+    try {
+      const response = await axiosInstancefile.post(`/showallnotes`, { email });
+      if (response.data && Array.isArray(response.data.data)) {
+        setNoteData(response.data.data);
+      } else {
+        setNoteData([]);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [email]);
 
@@ -82,7 +84,9 @@ const GetNotesByEmail = () => {
       <ThemeProvider theme={defaultTheme}>
         <CssBaseline />
         <main>
-          <h2 style={{ textAlign: "center", color: "#00695f" }}>Loading your notes...</h2>
+          <h2 style={{ textAlign: "center", color: "#00695f" }}>
+            Loading your notes...
+          </h2>
         </main>
       </ThemeProvider>
     );
@@ -93,16 +97,15 @@ const GetNotesByEmail = () => {
       <ThemeProvider theme={defaultTheme}>
         <CssBaseline />
         <main>
-          <h2 style={{ textAlign: "center", color: "#d32f2f" }}>Error: {error}</h2>
+          <h2 style={{ textAlign: "center", color: "#d32f2f" }}>
+            Error: {error}
+          </h2>
         </main>
       </ThemeProvider>
     );
   }
 
-  const handleNoteClick = (title) => {
-    navigate(`/updatecontent/${title}`);
-  };
-
+  
   return (
     <CenteredContainer>
       <ThemeProvider theme={defaultTheme}>
@@ -111,14 +114,20 @@ const GetNotesByEmail = () => {
           <Heading4
             text={"Your Notes"}
             variant={"h4"}
-            style={{ color: "#00695f", textAlign: "center", fontSize: "1.5rem" }}
+            style={{
+              color: "#00695f",
+              textAlign: "center",
+              fontSize: "1.5rem",
+            }}
           />
           <div style={{ padding: "20px" }}>
             {noteData.length > 0 ? (
               noteData.map((note, index) => (
                 <div key={index} style={{ marginBottom: "20px" }}>
                   <Button
-                    onClick={() => handleNoteClick(note.title)}
+                    onClick={() =>{
+                      console.log("note.title",note.title);
+                      handleNoteClick(note.title)}}
                     variant="outlined"
                     color="primary"
                     fullWidth
@@ -136,12 +145,18 @@ const GetNotesByEmail = () => {
                         </Typography>
                       </Grid>
                       <Grid item>
-                        <Typography variant="body1" style={{ fontStyle: "italic" }}>
+                        <Typography
+                          variant="body1"
+                          style={{ fontStyle: "italic" }}
+                        >
                           Author: {note.author}
                         </Typography>
                       </Grid>
                       <Grid item>
-                        <Typography variant="body2" style={{ marginTop: "10px" }}>
+                        <Typography
+                          variant="body2"
+                          style={{ marginTop: "10px" }}
+                        >
                           <strong>Content:</strong> {note.content}
                         </Typography>
                       </Grid>
